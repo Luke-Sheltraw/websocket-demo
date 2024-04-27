@@ -1,4 +1,5 @@
-const WEB_SOCKET_URL = 'ws://websocket-demo-sable.vercel.app:8000';
+const WEB_SOCKET_URL = 'wss://websocket-demo-sable.vercel.app:8000';
+// const WEB_SOCKET_URL = 'ws://localhost:8000';
 
 let webSocket;
 
