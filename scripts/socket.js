@@ -1,4 +1,4 @@
-const WEB_SOCKET_URL = 'wss://websocket-demo-luke.netlify.app:8000';
+const WEB_SOCKET_URL = 'wss://websocket-demo-dz24.onrender.com';
 // const WEB_SOCKET_URL = 'ws://localhost:8000';
 
 let webSocket;
