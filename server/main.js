@@ -14,6 +14,8 @@ const webSocketServer = new server({
 
 console.log('Server online');
 
+console.log(webSocketServer);
+
 let webSocketConnections = [];
 
 webSocketServer.on('request', (webSocketRequest) => {
