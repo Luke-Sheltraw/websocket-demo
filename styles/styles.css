@@ -1,3 +1,5 @@
+/* Messages */
+
 section#chat_wrapper {
   display: flex;
 }
@@ -25,4 +27,17 @@ input#message_contents {
 
 button#send_message {
   padding: 0 1rem;
+}
+
+/* Join code */
+section#join_room_wrapper {
+  display: flex;
+}
+
+section#join_code_wrapper,
+section#user_code_wrapper {
+  border: 1px solid black;
+  flex: 1;
+  padding: 1rem;
+  display: flex;
 }
