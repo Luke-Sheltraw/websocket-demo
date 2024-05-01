@@ -1,4 +1,12 @@
-/* Messages */
+/* General*/
+
+main {
+  display: flex;
+  flex-direction: column;
+  height: 600px;
+}
+
+/* Messages area */
 
 section#chat_wrapper {
   display: flex;
@@ -7,6 +15,8 @@ section#chat_wrapper {
 section#send_message_wrapper,
 section#received_message_wrapper {
   border: 1px solid black;
+  height: 200px;
+  overflow: scroll;
   flex: 1;
   padding: 1rem;
   display: flex;
@@ -29,7 +39,7 @@ button#send_message {
   padding: 0 1rem;
 }
 
-/* Join code */
+/* Join code area */
 section#join_room_wrapper {
   display: flex;
 }
@@ -40,4 +50,29 @@ section#user_code_wrapper {
   flex: 1;
   padding: 1rem;
   display: flex;
+}
+
+/* Game area */
+section#game_area {
+  border: 1px solid green;
+  flex: 1;
+}
+
+section#game_area.disabled {
+  visibility: hidden;
+}
+
+.avatar {
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+  width: 5rem;
+  position: absolute;
+}
+
+.avatar#self_character {
+  background-color: blue;
+}
+
+.avatar#opponent_character {
+  background-color: red;
 }

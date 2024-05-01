@@ -18,7 +18,8 @@ console.log(webSocketServer);
 
 let webSocketConnections = [];
 
-const gameInstances = {};
+const gameInstancesByRoom = {};
+const roomsByConnection = {};
 
 webSocketServer.on('request', (webSocketRequest) => {
   console.log(`Request received at "${ webSocketRequest.remoteAddress }"`);
@@ -27,13 +28,18 @@ webSocketServer.on('request', (webSocketRequest) => {
 
   console.log(`WebSocket connected at "${ webSocketConnection.remoteAddress }"`);
 
-  const roomCode = Math.floor(Math.random() * 10000);
+  const roomCode = Math.floor(Math.random() * 9000) + 1000;
 
-  webSocketConnection.sendUTF(JSON.stringify({ roomCode }));
-  gameInstances[roomCode] = {
+  webSocketConnection.sendUTF(JSON.stringify({
+    action: 'join_instance',
+    roomCode,
+  }));
+
+  gameInstancesByRoom[roomCode] = {
     roomCode,
     adminPlayerConnection: webSocketConnection,
   }
+  roomsByConnection[webSocketConnection] = roomCode;
 
   webSocketConnections.push(webSocketConnection);
 
@@ -45,16 +51,51 @@ webSocketServer.on('request', (webSocketRequest) => {
   webSocketConnection.on('message', (data) => {
     console.log(`Message received at "${ webSocketConnection.remoteAddress }": "${ data.utf8Data }"`);
 
-    
-    const roomCode = JSON.parse(data.utf8Data).roomCode;
-    if (roomCode) {
-      gameInstances[roomCode].secondaryPlayerConnection = webSocketConnection;
+    const messageObj = JSON.parse(data.utf8Data);
+
+    const action = messageObj.action;
+
+    console.log(action);
+
+    switch (action) {
+      case 'join_instance':
+        const roomCode = messageObj.roomCode;
+        console.log(`Secondary player joined instance with room code ${ roomCode }`);
+        gameInstancesByRoom[roomCode].secondaryPlayerConnection = webSocketConnection;
+        roomsByConnection[webSocketConnection] = roomCode;
+
+        // console.log(webSocketConnection);
+        webSocketConnection.sendUTF(JSON.stringify({
+          action: 'join_instance',
+          roomCode,
+        }));
+
+        webSocketConnection.sendUTF(JSON.stringify({
+          action: 'start_game',
+        }));
+
+        gameInstancesByRoom[roomCode].adminPlayerConnection.sendUTF(JSON.stringify({
+          action: 'start_game',
+        }));
+      break;
+      case 'update_position':
+        const xPos = messageObj.xPos;
+        const yPos = messageObj.yPos;
+
+        const gameInstance = gameInstancesByRoom[roomsByConnection[webSocketConnection]];
+        const targetConnection = webSocketConnection === gameInstance.adminPlayerConnection
+          ? gameInstance.secondaryPlayerConnection
+          : gameInstance.adminPlayerConnection; // choose opposite connection
+
+        targetConnection.sendUTF(JSON.stringify({
+          action: 'update_position',
+          xPos,
+          yPos,
+        }));
+      break;
+      default:
+      
     }
-    
-    console.log(gameInstances);
-    // webSocketConnections.forEach((webSocketConnection) => {
-    //   webSocketConnection.sendUTF(data.utf8Data);
-    // })
   })
 });
 

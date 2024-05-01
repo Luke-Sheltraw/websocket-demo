@@ -9,24 +9,31 @@
 </head>
 <body>
   <h1>WebSocket Demo</h1>
-  <section id="chat_wrapper">
-    <section id="send_message_wrapper">
-      <input type="text" name="message_contents" id="message_contents">
-      <button id="send_message">Send</button>
-    </section>
-    <section id="received_message_wrapper" role="log">
+  <main>
+    <section id="chat_wrapper">
+      <section id="send_message_wrapper">
+        <input type="text" name="message_contents" id="message_contents">
+        <button id="send_message">Send</button>
+      </section>
+      <section id="received_message_wrapper" role="log">
 
+      </section>
     </section>
-  </section>
 
-  <section id="join_room_wrapper">
-    <section id="join_code_wrapper">
-      <input type="text" name="join_code_contents" id="join_code_contents">
-      <button id="join_code_button">Send</button>
+    <section id="join_room_wrapper">
+      <section id="join_code_wrapper">
+        <input type="text" name="join_code_contents" id="join_code_contents">
+        <button id="join_code_button">Send</button>
+      </section>
+      <section id="user_code_wrapper">
+        <input type="text" name="user_code_contents" id="user_code_contents" value="ERROR" disabled>
+      </section>
     </section>
-    <section id="user_code_wrapper">
-      <input type="text" name="user_code_contents" id="user_code_contents" value="ERROR" disabled>
+
+    <section id="game_area" class="disabled">
+      <div id="self_character" class="avatar"></div>
+      <div id="opponent_character" class="avatar"></div>
     </section>
-  </section>
+  </main>
 </body>
 </html>

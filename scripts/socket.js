@@ -1,13 +1,24 @@
-const WEB_SOCKET_URL = 'wss://websocket-demo-6ygb.onrender.com';
-// const WEB_SOCKET_URL = 'ws://localhost:8000';
+// const WEB_SOCKET_URL = 'wss://websocket-demo-6ygb.onrender.com';
+const WEB_SOCKET_URL = 'ws://localhost:8000';
 
-let webSocket;
 const gameState = {
+  webSocket: null,
+  refreshIntervalFn: null,
   roomCode: null,
+  self: {
+    xPos: 0,
+    yPos: 0,
+    avatarEl: null,
+  },
+  opponent: {
+    xPos: 0,
+    yPos: 0,
+    avatarEl: null,
+  },
 };
 
 function sendMessage(messageContents) {
-  webSocket.send(messageContents);
+  gameState.webSocket.send(messageContents);
 }
 
 function displayMessage(messageContents) {
@@ -16,35 +27,87 @@ function displayMessage(messageContents) {
   const newMessageEl = document.createElement('p');
   newMessageEl.innerText = messageContents;
 
-  receivedMessageFeedEl.append(newMessageEl);
+  receivedMessageFeedEl.prepend(newMessageEl);
+}
+
+function refreshOpponentAnimation() {
+  gameState.opponent.avatarEl.style.transform = `translate(${
+    gameState.opponent.xPos
+  }px, ${
+    gameState.opponent.yPos
+  }px)`;
+}
+
+function startGame() {
+  gameState.self.avatarEl = document.querySelector('#self_character');
+  gameState.opponent.avatarEl = document.querySelector('#opponent_character');
+  console.log(gameState.opponent.avatarEl);
+  document.querySelector('#game_area').classList.remove('disabled');
+
+  window.addEventListener('keydown', (e) => {
+    switch (e.key) {
+      case 'ArrowDown':
+        gameState.self.yPos += 10;
+      break;
+      case 'ArrowUp':
+        gameState.self.yPos -= 10;
+      break;
+      case 'ArrowRight':
+        gameState.self.xPos += 10;
+      break;
+      case 'ArrowLeft':
+        gameState.self.xPos -= 10;
+      break;
+    }
+  });
+
+  gameState.refreshIntervalFn = setInterval(() => {
+    sendMessage(JSON.stringify({
+      action: 'update_position',
+      xPos: gameState.self.xPos,
+      yPos: gameState.self.yPos,
+    }));
+  }, 100);
+}
+
+function endGame() {
+  clearInterval(gameState.refreshIntervalFn);
 }
 
 function initializeWebSocket() {
-  if (webSocket) {
+  if (gameState.webSocket) {
     console.log('WebSocket already initialized; quitting');
-    return;
   }
 
-  webSocket = new WebSocket(WEB_SOCKET_URL, 'multiplayer-demo-protocol');
+  gameState.webSocket = new WebSocket(WEB_SOCKET_URL, 'multiplayer-demo-protocol');
 
-  let gameJoined = false;
+  gameState.webSocket.addEventListener('message', (e) => {
+    const messageObj = JSON.parse(e.data);
 
-  // webSocket.addEventListener('open', () => {
-  //   webSocket.send('Open event received');
-  // });
+    const action = messageObj.action;
 
-  webSocket.addEventListener('message', (e) => {
-    if (!gameJoined) {
-      console.log(JSON.parse(e.data));
-      const roomCode = JSON.parse(e.data).roomCode;
-      if (roomCode) {
-        gameJoined = true;
+    switch (action) {
+      case 'join_instance':
+        const roomCode = messageObj.roomCode;
         gameState.roomCode = roomCode;
         document.querySelector('#user_code_contents').value = roomCode;
-      }
+      break;
+      case 'start_game':
+        startGame();
+      break;
+      case 'update_position':
+        const xPos = messageObj.xPos;
+        const yPos = messageObj.yPos;
+
+        gameState.opponent.xPos= xPos;
+        gameState.opponent.yPos= yPos;
+
+        refreshOpponentAnimation();
+      break;
+      default:
+      
     }
 
-    console.log('Message receieved: ', e.data);
     displayMessage(e.data);
   })
 }
@@ -61,7 +124,10 @@ function initializeChatListeners() {
   document.querySelector('button#join_code_button').addEventListener('click', () => {
     const enteredCode = document.querySelector('input#join_code_contents').value;
 
-    sendMessage(JSON.stringify({ roomCode: enteredCode }));
+    sendMessage(JSON.stringify({
+      action: 'join_instance',
+      roomCode: enteredCode,
+    }));
   });
 }
 
