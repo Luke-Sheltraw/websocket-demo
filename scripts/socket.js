@@ -1,5 +1,5 @@
-// const WEB_SOCKET_URL = 'wss://websocket-demo-6ygb.onrender.com';
-const WEB_SOCKET_URL = 'ws://localhost:8000';
+const WEB_SOCKET_URL = 'wss://websocket-demo-6ygb.onrender.com';
+// const WEB_SOCKET_URL = 'ws://localhost:8000';
 
 let webSocket;
 const gameState = {
