@@ -9,6 +9,7 @@ const gameState = {
     xPos: 0,
     yPos: 0,
     avatarEl: null,
+    pendingUpdate: true,
   },
   opponent: {
     xPos: 0,
@@ -38,6 +39,14 @@ function refreshOpponentAnimation() {
   }px)`;
 }
 
+function refreshSelfAnimation() {
+  gameState.self.avatarEl.style.transform = `translate(${
+    gameState.self.xPos
+  }px, ${
+    gameState.self.yPos
+  }px)`;
+}
+
 function startGame() {
   gameState.self.avatarEl = document.querySelector('#self_character');
   gameState.opponent.avatarEl = document.querySelector('#opponent_character');
@@ -58,16 +67,22 @@ function startGame() {
       case 'ArrowLeft':
         gameState.self.xPos -= 10;
       break;
+      default: return;
     }
+
+    gameState.self.pendingUpdate = true;
+    refreshSelfAnimation();
   });
 
   gameState.refreshIntervalFn = setInterval(() => {
+    if (!gameState.self.pendingUpdate) return;
     sendMessage(JSON.stringify({
       action: 'update_position',
       xPos: gameState.self.xPos,
       yPos: gameState.self.yPos,
     }));
-  }, 100);
+    gameState.self.pendingUpdate = false;
+  }, 33);
 }
 
 function endGame() {
