@@ -23,15 +23,6 @@ function sendMessage(messageContents) {
   gameState.webSocket.send(messageContents);
 }
 
-function displayMessage(messageContents) {
-  const receivedMessageFeedEl = document.querySelector('#received_message_wrapper');
-
-  const newMessageEl = document.createElement('p');
-  newMessageEl.innerText = messageContents;
-
-  receivedMessageFeedEl.prepend(newMessageEl);
-}
-
 function refreshOpponentAnimation() {
   gameState.opponent.avatarEl.style.transform = `translate(${
     gameState.opponent.xPos
@@ -51,7 +42,7 @@ function refreshSelfAnimation() {
 function startGame() {
   gameState.self.avatarEl = document.querySelector('#self_character');
   gameState.opponent.avatarEl = document.querySelector('#opponent_character');
-  console.log(gameState.opponent.avatarEl);
+
   document.querySelector('#game_area').classList.remove('disabled');
 
   window.addEventListener('keydown', (e) => {
@@ -108,6 +99,8 @@ function initializeWebSocket() {
       break;
       case 'start_game':
         startGame();
+        document.querySelector('#join_code_button').disabled = true;
+        document.querySelector('#join_code_contents').disabled = true;
       break;
       case 'update_position':
         const xPos = messageObj.xPos;
@@ -121,20 +114,10 @@ function initializeWebSocket() {
       default:
       
     }
-
-    displayMessage(e.data);
-  })
+  });
 }
 
-function initializeChatListeners() {
-  const sendButtonEl = document.querySelector('button#send_message');
-  const messageContentsInputEl = document.querySelector('input#message_contents');
-
-  sendButtonEl.addEventListener('click', () => sendMessage(messageContentsInputEl.value) );
-  messageContentsInputEl.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendMessage(messageContentsInputEl.value);
-  });
-
+function initializeEventListeners() {
   document.querySelector('button#join_code_button').addEventListener('click', () => {
     const enteredCode = document.querySelector('input#join_code_contents').value;
 
@@ -147,7 +130,7 @@ function initializeChatListeners() {
 
 function init() {
   initializeWebSocket();
-  initializeChatListeners();
+  initializeEventListeners();
 }
 
 window.addEventListener('DOMContentLoaded', init);

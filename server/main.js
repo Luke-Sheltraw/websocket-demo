@@ -1,20 +1,20 @@
+import { createServer } from 'http';
 import { server } from 'websocket';
-import { generateGameCode } from './util.js';
-import * as http from 'node:http';
 import { randomUUID } from 'crypto';
+import { generateGameCode } from './util.js';
 
 const PORT = process.env.PORT || 8000;
 const OFFERED_PROTOCOL = 'multiplayer-demo-protocol';
 
+const gameInstancesByGameCode = {};
+const gameInstancesByPlayerUUID = {};
+
 const webSocketServer = new server({
-  httpServer: http.createServer().listen(PORT),
+  httpServer: createServer().listen(PORT),
   autoAcceptConnections: false,
 });
 
 console.log('Server online');
-
-const gameInstancesByGameCode = {};
-const gameInstancesByPlayerUUID = {};
 
 /**
  * For a given connection, sends stringified version of object for re-parsing on other side
@@ -177,15 +177,19 @@ function handleRequest(webSocketRequest) {
   function handleMessage(data) {
     console.log(`Message received at "${ webSocketConnection.remoteAddress }": "${ data.utf8Data }"`);
 
-    const messageObj = JSON.parse(data.utf8Data);
+    try {
+      const messageObj = JSON.parse(data.utf8Data);
 
-    switch (messageObj.action) {
-      case 'join_instance':
-        joinInstance(webSocketConnection, messageObj.gameCode);
-      break;
-      case 'update_position':
-        updatePosition(webSocketConnection, +messageObj.xPos, +messageObj.yPos);
-      break;
+      switch (messageObj.action) {
+        case 'join_instance':
+          joinInstance(webSocketConnection, messageObj.gameCode);
+        break;
+        case 'update_position':
+          updatePosition(webSocketConnection, +messageObj.xPos, +messageObj.yPos);
+        break;
+      }
+    } catch {
+      console.log(`Error handling message at "${ webSocketConnection.remoteAddress }"`);
     }
   } /* handleMessage */
 
