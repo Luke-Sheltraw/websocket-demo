@@ -1,10 +1,11 @@
-const WEB_SOCKET_URL = 'wss://websocket-demo-6ygb.onrender.com';
-// const WEB_SOCKET_URL = 'ws://localhost:8000';
+// const WEB_SOCKET_URL = 'wss://websocket-demo-6ygb.onrender.com';
+const WEB_SOCKET_URL = 'ws://localhost:8000';
+const REQUESTED_PROTOCOL = 'multiplayer-demo-protocol';
 
 const gameState = {
   webSocket: null,
   refreshIntervalFn: null,
-  roomCode: null,
+  gameCode: null,
   self: {
     xPos: 0,
     yPos: 0,
@@ -94,18 +95,16 @@ function initializeWebSocket() {
     console.log('WebSocket already initialized; quitting');
   }
 
-  gameState.webSocket = new WebSocket(WEB_SOCKET_URL, 'multiplayer-demo-protocol');
+  gameState.webSocket = new WebSocket(WEB_SOCKET_URL, REQUESTED_PROTOCOL);
 
   gameState.webSocket.addEventListener('message', (e) => {
     const messageObj = JSON.parse(e.data);
 
-    const action = messageObj.action;
-
-    switch (action) {
+    switch (messageObj.action) {
       case 'join_instance':
-        const roomCode = messageObj.roomCode;
-        gameState.roomCode = roomCode;
-        document.querySelector('#user_code_contents').value = roomCode;
+        const gameCode = messageObj.gameCode;
+        gameState.gameCode = gameCode;
+        document.querySelector('#user_code_contents').value = gameCode;
       break;
       case 'start_game':
         startGame();
@@ -141,7 +140,7 @@ function initializeChatListeners() {
 
     sendMessage(JSON.stringify({
       action: 'join_instance',
-      roomCode: enteredCode,
+      gameCode: enteredCode,
     }));
   });
 }
