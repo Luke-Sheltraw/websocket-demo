@@ -67,6 +67,7 @@ section#game_area.disabled {
   aspect-ratio: 1 / 1;
   width: 5rem;
   position: absolute;
+  transition: 50ms linear;
 }
 
 .avatar#self_character {
